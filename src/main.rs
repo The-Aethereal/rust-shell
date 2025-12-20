@@ -1,3 +1,4 @@
+#[allow(unused_imports)] 
 mod tokenizer;
 use tokenizer::{tokenize, Token};
 
@@ -6,18 +7,17 @@ use type_command::{type_command_call_this_in_match, BUILTINS};
 
 use std::io::{self, Write};
 
-
 fn main() {
     loop {
         print!("$ ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush().unwrap();  //to display output directly in terminal instead of storing in memory and waiting
 
         let mut command = String::new();
-        io::stdin().read_line(&mut command).unwrap();
+        io::stdin().read_line(&mut command).unwrap(); //handle unwrap better here
 
         let cmd = command.trim();
         let tokens = tokenize(cmd).unwrap();
-        if(tokens.is_empty()){continue;}
+        if tokens.is_empty() {continue;}  //to handle enter key
 
         match &tokens[0] {
             Token::Word(first_token_here) => {
@@ -29,7 +29,7 @@ fn main() {
                                 } 
                                 else { type_command_call_this_in_match(&tokens);}
                     }
-                    "echo" =>{
+                    "echo" =>{  //this why Token enum is defined
                         let msg = &tokens[1..];
                         for t in msg {
                             print!("{t} ");
@@ -41,7 +41,7 @@ fn main() {
             
             }
             Token::Pipe => {
-                    println!("syntax error near '|'");
+                    println!("syntax error near '|'"); //idk what to do , modify this
                 }
             _ => {println!("other token than Word or PIPE, modifyy the tokenise.rs to accomodate uit.")} 
         }        

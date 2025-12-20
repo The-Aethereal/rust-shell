@@ -1,4 +1,3 @@
-
 use std::fmt;
 
 impl fmt::Display for Token {
@@ -22,19 +21,16 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
 
     while let Some(&ch) = chars.peek() {
         match ch {
-            // 1️⃣ Skip whitespace
-            ' ' | '\t' | '\n' => {
+            ' ' | '\t' | '\n' => {  //skiping whitespaces
                 chars.next();
             }
 
-            // 2️⃣ Pipe operator
-            '|' => {
+            '|' => {  //pipe operator
                 chars.next();
                 tokens.push(Token::Pipe);
             }
 
-            // 3️⃣ Quoted string
-            '"' => {
+            '"' => {  //handling quotation strng
                 chars.next(); // consume opening quote
                 let mut value = String::new();
 
@@ -48,8 +44,7 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                 tokens.push(Token::Word(value));
             }
 
-            // 4️⃣ Normal word
-            _ => {
+            _ => {  //fallback(for normal word)
                 let mut value = String::new();
 
                 while let Some(&c) = chars.peek() {
