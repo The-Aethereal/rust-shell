@@ -1,5 +1,6 @@
+mod tokenizer;
+use tokenizer::{tokenize, Token};
 use std::io::{self, Write};
-
 fn main() {
     loop {
         print!("$ ");
@@ -9,10 +10,16 @@ fn main() {
         io::stdin().read_line(&mut command).unwrap();
 
         let cmd = command.trim();
+        let tokens = tokenize(cmd).unwrap();
 
-        if let Some(msg) = cmd.strip_prefix("echo ") {
-            println!("{msg}");
-        } else {
+        if tokens[0]==Token::Word(String::from("echo")){
+            let msg = &tokens[1..];
+            for t in msg {
+                print!("{t} ");
+            }
+            println!();
+        }
+        else {
             match cmd {
                 "" => continue,
                 "exit" => return,
