@@ -6,6 +6,34 @@ mod type_command;
 use type_command::{type_command_call_this_in_match, BUILTINS};
 
 use std::io::{self, Write};
+use std::process::Command;
+use std::env;
+
+
+pub fn externalcommand(tokens: &Vec<Token>) -> std::io::Result<i32> {
+    let mut argv: Vec<&String> = Vec::new(); // mnade for extracting words frim tokens
+
+    for token in tokens {
+        match token {
+            Token::Word(s) => argv.push(s),
+            Token::Pipe => break, // stop at pipe for now
+        }
+    }
+
+    if argv.is_empty() {
+        return Ok(0);
+    }
+
+    let mut cmd = Command::new(argv[0]);
+
+    if argv.len() > 1 {
+        cmd.args(&argv[1..]);
+    }
+
+    let status = cmd.spawn()?.wait()?;
+    Ok(status.code().unwrap_or_default())
+}
+
 
 fn main() {
     loop {
@@ -18,6 +46,11 @@ fn main() {
         let cmd = command.trim();
         let tokens = tokenize(cmd).unwrap();
         if tokens.is_empty() {continue;}  //to handle enter key
+        //used for running external command
+        let query= match &tokens[0] {
+            Token::Word(ms) => ms.as_str(),
+            Token::Pipe => {panic!("check type_command file, why is token a pipe");} 
+        };
 
         match &tokens[0] {
             Token::Word(first_token_here) => {
@@ -36,7 +69,13 @@ fn main() {
                         }
                         println!();
                     }
-                    _ => println!("{}: command not found", tokens[0]),
+                    _ =>if let Some(path) = type_command::find_in_path(&query){
+                            match externalcommand (&tokens) {
+                                Ok(code) => {},
+                                Err(e) => eprintln!("error: {}", e),
+                            }
+                        }
+                        else{println!("{}: command not found", tokens[0]);},
                 }
             
             }
@@ -47,3 +86,7 @@ fn main() {
         }        
     }
 }
+
+
+
+
