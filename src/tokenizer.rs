@@ -20,44 +20,54 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, String> {
     let mut chars = input.chars().peekable();
 
     while let Some(&ch) = chars.peek() {
-        match ch {
-            ' ' | '\t' | '\n' => {  //skiping whitespaces
-                chars.next();
-            }
+        if ch.is_whitespace() {
+            chars.next();
+            continue;
+        }
+        if ch == '|' {
+            chars.next();
+            tokens.push(Token::Pipe);
+            continue;
+        }
+        //else start a word.
+        let mut value = String::new();
+        while let Some(&c) = chars.peek() {
 
-            '|' => {  //pipe operator
-                chars.next();
-                tokens.push(Token::Pipe);
+            if c.is_whitespace() || c == '|' {
+                break;
             }
+            match c {
 
             '"' => {  //handling quotation strng
                 chars.next(); // consume opening quote
-                let mut value = String::new();
 
-                while let Some(c) = chars.next() {
-                    if c == '"' {
+                while let Some(ch2) = chars.next() {
+                    if ch2 == '"' {
                         break;
                     }
-                    value.push(c);
+                    value.push(ch2);
                 }
 
-                tokens.push(Token::Word(value));
             }
+            '\'' => {  
+                chars.next(); 
 
-            _ => {  //fallback(for normal word)
-                let mut value = String::new();
-
-                while let Some(&c) = chars.peek() {
-                    if c.is_whitespace() || c == '|' {
+                while let Some(ch2) = chars.next() {
+                    if ch2 == '\'' {
                         break;
                     }
+                    value.push(ch2);
+                }
+            }
+            
+            _ => {  //fallback(for normal word)
                     value.push(c);
                     chars.next();
                 }
 
-                tokens.push(Token::Word(value));
             }
         }
+                tokens.push(Token::Word(value));
     }
 
     Ok(tokens)

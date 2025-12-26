@@ -3,16 +3,10 @@ mod tokenizer;
 use tokenizer::{tokenize, Token};
 
 mod type_command;
-use type_command::{type_command_call_this_in_match, BUILTINS};
 mod external_commands;
-use external_commands::{externalcommand};
 mod pipe;
-use pipe::{split_by_pipe,execute_pipeline};
 
 use std::io::{self, Write};
-use std::process::Command;
-use std::env;
-
 
 fn main() {
     loop {
@@ -39,9 +33,9 @@ fn main() {
                                     println!("type: missing argument");
                                     continue;
                                 } 
-                                else { type_command_call_this_in_match(&tokens);}
+                                else { type_command::type_command_call_this_in_match(&tokens);}
                     }
-                    "echo" =>{  //this why Token enum is defined
+                    "echo" =>{ 
                         let msg = &tokens[1..];
                         for t in msg {
                             print!("{t} ");
@@ -50,8 +44,8 @@ fn main() {
                     }
                     _ =>if let Some(path) = type_command::find_in_path(&query){
                             match external_commands::externalcommand (&tokens) {
-                                Ok(code) => {},
-                                Err(e) => eprintln!("error: {}", e),
+                                Ok(_code) => {},
+                                Err(_e) => eprintln!("error: {}", _e),
                             }
                         }
                         else{println!("{}: command not found", tokens[0]);},

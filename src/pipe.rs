@@ -1,14 +1,13 @@
 #[allow(unused_imports)] 
 
 use crate::Token;
-use std::io::{stdin, stdout};
 
-use nix::unistd::{Pid,pipe, close, execvp,fork, ForkResult};
-use nix::sys::wait::{waitpid,WaitStatus};
+use nix::unistd::{Pid,pipe, execvp,fork, ForkResult};
+use nix::sys::wait::{waitpid};
 use std::ffi::CString;
 use nix::unistd::dup2;
 
-use std::os::fd::{AsRawFd, BorrowedFd, FromRawFd, OwnedFd};
+use std::os::fd::{FromRawFd, OwnedFd};
 
 
 pub fn split_by_pipe(tokens: &[Token]) -> Vec<Vec<Token>> {
@@ -64,12 +63,17 @@ pub fn execute_pipeline(commands: Vec<Vec<String>>) {
                 drop(prev_read);
                 drop(pipefds);
 
-                // Exec
+      // Exec
                 let cstrs: Vec<CString> =
                     cmd.iter().map(|s| CString::new(s.as_str()).unwrap()).collect();
                 let args: Vec<&CString> = cstrs.iter().collect();
 
-                execvp(&args[0], &args).unwrap_or_else(|_| std::process::exit(1));
+                // execvp never returns on success, only on error
+                if let Err(_) = execvp(&args[0], &args) {
+                    std::process::exit(1);
+                }
+                // This point is unreachable but needed for type checking
+                unreachable!()
             }
 
             ForkResult::Parent { child } => {

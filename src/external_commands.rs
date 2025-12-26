@@ -1,10 +1,7 @@
 #[allow(unused_imports)] 
-
 use crate::Token;
-use crate::pipe::{split_by_pipe,execute_pipeline};
-use std::io::{self, Write};
+use crate::pipe;
 use std::process::Command;
-use std::env;
 
 
 //helper function for converting Vec<Vec<Token>> to Vec<Vec<String>> in pipe command
@@ -23,7 +20,7 @@ pub fn externalcommand(tokens: &Vec<Token>) -> std::io::Result<i32> {
 
     if has_pipe {
         // Split tokens into pipeline segments
-        let segments = split_by_pipe(tokens);
+        let segments = pipe::split_by_pipe(tokens);
 
         // Convert each segment into argv (Vec<String>)
         let commands: Vec<Vec<String>> = segments
@@ -33,12 +30,12 @@ pub fn externalcommand(tokens: &Vec<Token>) -> std::io::Result<i32> {
             .collect();
 
         // Execute pipeline (handles fork/exec internally)
-        execute_pipeline(commands);
+        pipe::execute_pipeline(commands);
 
         // Pipelines usually return status of last command
         return Ok(0); // placeholder for now
     }
-    else{
+    else {
         let argv = tokens_to_argv(tokens);
 
         if argv.is_empty() {
