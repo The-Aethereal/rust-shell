@@ -1,6 +1,12 @@
 [package]
-name = "rust_shell"
+name = "codecrafters-shell"
 version = "0.1.0"
+authors = ["Codecrafters <hello@codecrafters.io>"]
 edition = "2024"
+rust-version = "1.91"
 
 [dependencies]
+anyhow = "1.0.68"                                # error handling
+bytes = "1.3.0"                                  # helps manage buffers
+nix = {version="0.30.1", features = ["process","fs"]}
+thiserror = "1.0.38"                             # error handling

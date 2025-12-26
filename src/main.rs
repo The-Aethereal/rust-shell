@@ -4,35 +4,14 @@ use tokenizer::{tokenize, Token};
 
 mod type_command;
 use type_command::{type_command_call_this_in_match, BUILTINS};
+mod external_commands;
+use external_commands::{externalcommand};
+mod pipe;
+use pipe::{split_by_pipe,execute_pipeline};
 
 use std::io::{self, Write};
 use std::process::Command;
 use std::env;
-
-
-pub fn externalcommand(tokens: &Vec<Token>) -> std::io::Result<i32> {
-    let mut argv: Vec<&String> = Vec::new(); // mnade for extracting words frim tokens
-
-    for token in tokens {
-        match token {
-            Token::Word(s) => argv.push(s),
-            Token::Pipe => break, // stop at pipe for now
-        }
-    }
-
-    if argv.is_empty() {
-        return Ok(0);
-    }
-
-    let mut cmd = Command::new(argv[0]);
-
-    if argv.len() > 1 {
-        cmd.args(&argv[1..]);
-    }
-
-    let status = cmd.spawn()?.wait()?;
-    Ok(status.code().unwrap_or_default())
-}
 
 
 fn main() {
@@ -70,7 +49,7 @@ fn main() {
                         println!();
                     }
                     _ =>if let Some(path) = type_command::find_in_path(&query){
-                            match externalcommand (&tokens) {
+                            match external_commands::externalcommand (&tokens) {
                                 Ok(code) => {},
                                 Err(e) => eprintln!("error: {}", e),
                             }
